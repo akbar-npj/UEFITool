@@ -55,7 +55,13 @@ An all-in-one automation script [`build.sh`](build.sh) is provided in the reposi
 
 # 5. Install compiled binaries
 sudo ./build.sh install
+
+# 6. Show the newest RPM in dist/ (selected by timestamp)
+./build.sh latest
 ```
+
+> [!NOTE]
+> **Package selection by newest timestamp**: When the `dist/` directory contains multiple RPM packages from previous builds, `build.sh` always selects the one with the **newest filesystem modification time** (`mtime`) for display and reporting. This avoids ambiguity after accumulating packages across multiple builds. Use `./build.sh latest` to quickly identify the current package without rebuilding.
 
 ### Script Commands and Flags
 
@@ -66,10 +72,10 @@ sudo ./build.sh install
 | `rpm` / `-r` | Generates source tarball and builds `.rpm` packages via `rpmbuild` |
 | `clean` / `-c` | Cleans `build/` and `dist/` directories |
 | `install` | Installs targets to `--prefix` (default: `/usr/local`) |
+| `latest` | Lists all packages in `dist/` newest-first and highlights the newest one |
 | `all` | Sequentially cleans, builds, tests, and builds RPM packages |
 | `-d`, `--debug` | Compiles with Debug symbols (`-DCMAKE_BUILD_TYPE=Debug`) |
 | `-j <N>` | Sets compilation jobs (default: detected CPU count) |
-
 
 ---
 

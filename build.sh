@@ -2,6 +2,10 @@
 #
 # build.sh - Build, test, and package UEFITool, UEFIExtract, and UEFIFind
 #
+# Package selection: when multiple RPMs exist in dist/, all functions that
+# report or install a package will automatically pick the one with the
+# newest filesystem modification timestamp (via `ls -t`).
+#
 set -euo pipefail
 
 # Directory paths
@@ -54,6 +58,32 @@ log_error() {
     echo -e "${RED}${BOLD}[ERROR]${RESET} $*" >&2
 }
 
+# Returns the path of the newest (by mtime) *.rpm file in DIST_DIR.
+# Prints nothing and returns 1 if no RPM packages are found.
+newest_rpm() {
+    local newest
+    newest="$(ls -t "${DIST_DIR}"/*.rpm 2>/dev/null | head -n1)"
+    if [ -z "$newest" ]; then
+        return 1
+    fi
+    echo "$newest"
+}
+
+# Prints all RPMs in DIST_DIR sorted newest-first, with size and timestamp.
+list_packages_newest_first() {
+    if ! ls "${DIST_DIR}"/*.rpm &>/dev/null; then
+        log_warn "No RPM packages found in ${DIST_DIR}/"
+        return 0
+    fi
+    log_info "Packages in ${DIST_DIR}/ (newest first):"
+    # ls -lt gives long listing sorted by mtime (newest first)
+    ls -lht "${DIST_DIR}"/*.rpm
+    echo ""
+    local pkg
+    pkg="$(newest_rpm)"
+    log_success "Newest package: ${pkg}"
+}
+
 show_help() {
     cat << EOF
 ${BOLD}UEFITool Build & Automation Script${RESET}
@@ -68,6 +98,7 @@ ${BOLD}COMMANDS:${RESET}
   install             Install compiled targets to prefix
   clean               Remove build and dist artifacts
   all                 Clean, build, test, and create RPM package
+  latest              Show the newest RPM package in dist/ by timestamp
   help                Display this help message
 
 ${BOLD}OPTIONS:${RESET}
@@ -87,6 +118,7 @@ ${BOLD}EXAMPLES:${RESET}
   ./build.sh test                # Run test suite on existing build
   ./build.sh rpm                 # Build RPM package using rpmbuild
   ./build.sh all                 # Clean, build, test, and package RPM
+  ./build.sh latest              # Display the newest RPM in dist/
   sudo ./build.sh install        # Install binaries to /usr/local
 EOF
 }
@@ -127,6 +159,10 @@ while [ $# -gt 0 ]; do
         help|-h|--help)
             show_help
             exit 0
+            ;;
+        latest)
+            SUBCOMMAND="latest"
+            shift
             ;;
         -t|--test)
             DO_TEST=1
@@ -347,8 +383,14 @@ build_rpm() {
     cp -v "${topdir}/RPMS/"*"/uefitool-"*"${version}"*".rpm" "${DIST_DIR}/" 2>/dev/null || true
     cp -v "${topdir}/SRPMS/uefitool-"*"${version}"*".src.rpm" "${DIST_DIR}/" 2>/dev/null || true
 
-    log_success "RPM build complete! Artifacts available in ${DIST_DIR}:"
-    ls -lh "${DIST_DIR}"/*.rpm
+    log_success "RPM build complete! All artifacts in ${DIST_DIR}/ (newest first):"
+    # List all packages sorted by newest timestamp so it's clear which is current
+    ls -lht "${DIST_DIR}"/*.rpm
+    echo ""
+    local newest_pkg
+    if newest_pkg="$(newest_rpm)"; then
+        log_success "Newest package (selected by timestamp): ${newest_pkg}"
+    fi
 }
 
 # Install targets
@@ -385,6 +427,10 @@ case "$SUBCOMMAND" in
         ;;
     install)
         install_targets
+        ;;
+    latest)
+        # Show only the newest RPM in dist/ by mtime (ignores older packages)
+        list_packages_newest_first
         ;;
     all)
         build_targets
