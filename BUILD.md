@@ -7,6 +7,7 @@ This guide covers building **UEFITool**, **UEFIExtract**, and **UEFIFind** from 
 ## Table of Contents
 
 - [Components](#components)
+- [Automated Build & Test Script (build.sh)](#automated-build--test-script-buildsh)
 - [Prerequisites & Dependencies](#prerequisites--dependencies)
   - [Fedora / RHEL / CentOS / Asahi Remix](#fedora--rhel--centos--asahi-remix)
   - [Ubuntu / Debian](#ubuntu--debian)
@@ -32,6 +33,43 @@ The repository produces three main tools:
 | `uefitool` | UEFI firmware image viewer, tree browser, and editor | GUI | C++11, Qt6 (or Qt5) |
 | `uefiextract` | Tool to dump and unpack parsed UEFI firmware structures | CLI | C++11 (no Qt dependency) |
 | `uefifind` | Search utility for GUIDs, text strings, and hex patterns | CLI | C++11 (no Qt dependency) |
+
+---
+
+## Automated Build & Test Script (build.sh)
+
+An all-in-one automation script [`build.sh`](build.sh) is provided in the repository root.
+
+```bash
+# 1. Compile everything in Release mode
+./build.sh
+
+# 2. Compile and immediately run verification tests
+./build.sh --test
+
+# 3. Build RPM packages (binary + source) into dist/
+./build.sh rpm
+
+# 4. Clean, build, test, and package RPM in one step
+./build.sh all
+
+# 5. Install compiled binaries
+sudo ./build.sh install
+```
+
+### Script Commands and Flags
+
+| Command / Flag | Action |
+| :--- | :--- |
+| `build` (default) | Configures and compiles all components via CMake + Ninja/Make |
+| `test` / `-t` | Runs test suite verifying version output, help options, and GUI libraries |
+| `rpm` / `-r` | Generates source tarball and builds `.rpm` packages via `rpmbuild` |
+| `clean` / `-c` | Cleans `build/` and `dist/` directories |
+| `install` | Installs targets to `--prefix` (default: `/usr/local`) |
+| `all` | Sequentially cleans, builds, tests, and builds RPM packages |
+| `-d`, `--debug` | Compiles with Debug symbols (`-DCMAKE_BUILD_TYPE=Debug`) |
+| `-j <N>` | Sets compilation jobs (default: detected CPU count) |
+
 
 ---
 
