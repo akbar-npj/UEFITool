@@ -44,8 +44,12 @@ Right now there are some alternatives to UEFITool that you could find useful too
 ## Installation
 
 You can either use [pre-built binaries](https://github.com/LongSoft/UEFITool/releases) or build the binaries yourself.  
-* To build a binary that uses Qt library (UEFITool) you need a C++ compiler and an instance of [Qt5 or Qt6](https://www.qt.io) library. Install both of them, get the sources, generate makefiles using qmake (`qmake ./UEFITool/uefitool.pro`) and use your system's make command on that generated files (i.e. `nmake release`, `make release` and so on). Qt6-based builds can also use CMAKE as an altearnative build system.
+
+For detailed, step-by-step instructions across distributions (including dependencies, CMake/QMake/Meson build options, and RPM packaging), see the **[Compilation & Building Guide (BUILD.md)](BUILD.md)**.
+
+* To build a binary that uses Qt library (UEFITool) you need a C++ compiler and an instance of [Qt5 or Qt6](https://www.qt.io) library. Install both of them, get the sources, generate makefiles using qmake (`qmake ./UEFITool/uefitool.pro`) and use your system's make command on that generated files (i.e. `nmake release`, `make release` and so on). Qt6-based builds can also use CMAKE as an alternative build system.
 * To build a binary that doesn't use Qt (UEFIExtract, UEFIFind), you need a C++ compiler and [CMAKE](https://cmake.org) utility to generate a makefile for your OS and build environment. Install both of them, get the sources, generate makefiles using cmake (`cmake UEFIExtract`) and use your system's make command on that generated files (i.e. `nmake release`, `make release` and so on). Non-Qt builds can also use Meson as an alternative build system.
+
 
 ## Known issues
 
